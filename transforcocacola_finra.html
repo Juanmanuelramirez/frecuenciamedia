@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Revolución Serverless: Coca-Cola vs. FINRA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony Neutrals -->
+    <!-- Application Structure Plan: The SPA is designed as a comparative narrative. It starts with a high-level dashboard comparing Coca-Cola (customer-facing innovation) and FINRA (backend data scale) across key metrics. This allows users to grasp the core differences immediately. From there, users can navigate to detailed sections for each company, which feature interactive architecture diagrams and dynamic charts visualizing key results. The structure concludes with a synthesis of strategic lessons from both cases. This non-linear, thematic structure prioritizes user understanding and exploration over simply replicating the source reports. -->
+    <!-- Visualization & Content Choices: 
+        - Goal: Compare -> Method: Side-by-side dashboard with stat cards -> Interaction: Scroll-to-section links -> Justification: Provides immediate high-level comparison and easy navigation.
+        - Goal: Explain Architecture -> Method: HTML/CSS diagram -> Interaction: Hover to show tooltips with service info -> Justification: Engages users and explains technology without static images, adhering to NO SVG rule.
+        - Goal: Show Progress/Change -> Method: Chart.js Bar/Timeline charts -> Interaction: Animated on scroll, tooltips -> Justification: Clearly visualizes the most impactful results (time-to-market for Coke, processing speed for FINRA).
+        - Goal: Highlight Metrics -> Method: Animated stat cards -> Interaction: Numbers count up on scroll -> Justification: Creates a dynamic "wow" factor and draws attention to key achievements.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F5F2;
+            color: #4A4A4A;
+        }
+        .coke-accent-bg { background-color: #D87070; }
+        .coke-accent-text { color: #D87070; }
+        .coke-accent-border { border-color: #D87070; }
+        .finra-accent-bg { background-color: #6A8EAE; }
+        .finra-accent-text { color: #6A8EAE; }
+        .finra-accent-border { border-color: #6A8EAE; }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .fade-in-section.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .architecture-tooltip {
+            position: absolute;
+            display: none;
+            background-color: #2d3748;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            z-index: 10;
+            width: 200px;
+            bottom: 110%;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+        }
+        .architecture-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #2d3748 transparent transparent transparent;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-40 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-gray-800">Revolución Serverless</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#intro" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Introducción</a>
+                        <a href="#comparison" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Comparativa</a>
+                        <a href="#cocacola" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Coca-Cola</a>
+                        <a href="#finra" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">FINRA</a>
+                        <a href="#lessons" class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Lecciones</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="intro" class="py-20 md:py-28">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-4xl md:text-5xl font-bold tracking-tight text-gray-900">Dos Caminos Hacia la Transformación Digital</h2>
+                <p class="mt-6 max-w-3xl mx-auto text-lg md:text-xl text-gray-600">
+                    Descubre cómo dos organizaciones radicalmente diferentes, un gigante de consumo global y un estricto regulador financiero, aprovecharon la misma tecnología —la computación *serverless* de AWS— para resolver sus desafíos más críticos. Esta es la historia de la velocidad de innovación de Coca-Cola frente a la escala masiva de datos de FINRA.
+                </p>
+            </div>
+        </section>
+
+        <section id="comparison" class="py-16 bg-white fade-in-section">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold text-gray-900">Comparativa de Casos de Estudio</h3>
+                    <p class="mt-4 text-lg text-gray-600">Un vistazo a los desafíos, soluciones y resultados que definieron cada transformación.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-gray-50 rounded-xl p-8 shadow-md border-t-4 coke-accent-border">
+                        <h4 class="text-2xl font-bold coke-accent-text">The Coca-Cola Company</h4>
+                        <p class="mt-2 text-gray-600">Innovación de cara al cliente bajo presión.</p>
+                        <ul class="mt-6 space-y-4 text-left">
+                            <li class="flex items-start">
+                                <span class="flex-shrink-0 h-6 w-6 text-xl coke-accent-text">🎯</span>
+                                <span class="ml-3 text-gray-700"><strong>El Reto:</strong> Responder a una crisis de mercado con una solución sin contacto en tiempo récord.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="flex-shrink-0 h-6 w-6 text-xl coke-accent-text">💡</span>
+                                <span class="ml-3 text-gray-700"><strong>La Solución:</strong> Una arquitectura *serverless* orientada a eventos para una rápida iteración.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="flex-shrink-0 h-6 w-6 text-xl coke-accent-text">🏆</span>
+                                <span class="ml-3 text-gray-700"><strong>El Resultado:</strong> De la idea al mercado en menos de 100 días con un 65% de ahorro en costos.</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-gray-50 rounded-xl p-8 shadow-md border-t-4 finra-accent-border">
+                        <h4 class="text-2xl font-bold finra-accent-text">FINRA</h4>
+                        <p class="mt-2 text-gray-600">Procesamiento de datos a escala masiva y volátil.</p>
+                        <ul class="mt-6 space-y-4 text-left">
+                            <li class="flex items-start">
+                                <span class="flex-shrink-0 h-6 w-6 text-xl finra-accent-text">🎯</span>
+                                <span class="ml-3 text-gray-700"><strong>El Reto:</strong> Validar hasta 75 mil millones de transacciones diarias de forma rentable y segura.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="flex-shrink-0 h-6 w-6 text-xl finra-accent-text">💡</span>
+                                <span class="ml-3 text-gray-700"><strong>La Solución:</strong> Un sistema de procesamiento masivamente paralelo basado en eventos de S3 y funciones Lambda.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="flex-shrink-0 h-6 w-6 text-xl finra-accent-text">🏆</span>
+                                <span class="ml-3 text-gray-700"><strong>El Resultado:</strong> Reducción del 85% en el tiempo de procesamiento con una mejora de 2x en eficiencia de costos.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="cocacola" class="py-20 fade-in-section">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold coke-accent-text">Caso de Estudio: Coca-Cola</h3>
+                    <p class="mt-4 text-lg text-gray-600">Cómo una estrategia "serverless-first" permitió una agilidad sin precedentes.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <h4 class="text-2xl font-semibold mb-4">La Arquitectura de la Velocidad</h4>
+                        <p class="text-gray-700 mb-6">
+                            Para lanzar la experiencia sin contacto "Mobile Pour", Coca-Cola necesitaba una arquitectura que no requiriera gestión de servidores y que pudiera escalar instantáneamente. La solución fue un flujo simple y potente orientado a eventos. Pasa el cursor sobre los iconos para saber más.
+                        </p>
+                        <div class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+                            <div class="flex items-center justify-around text-center">
+                                <div class="relative architecture-node">
+                                    <div class="text-4xl">📱</div>
+                                    <p class="mt-2 font-semibold text-sm">Usuario</p>
+                                </div>
+                                <div class="text-gray-400 font-bold text-2xl">→</div>
+                                <div class="relative architecture-node" data-tooltip="Amazon API Gateway: Actúa como la 'puerta de entrada' para las solicitudes de la aplicación, gestionando el tráfico y la seguridad.">
+                                    <div class="text-4xl">🚪</div>
+                                    <p class="mt-2 font-semibold text-sm">API Gateway</p>
+                                    <div class="architecture-tooltip"></div>
+                                </div>
+                                <div class="text-gray-400 font-bold text-2xl">→</div>
+                                <div class="relative architecture-node" data-tooltip="AWS Lambda: Ejecuta la lógica de negocio (ej. 'servir bebida') sin necesidad de un servidor. Paga solo por el tiempo de cómputo utilizado.">
+                                    <div class="text-4xl">⚡️</div>
+                                    <p class="mt-2 font-semibold text-sm">AWS Lambda</p>
+                                    <div class="architecture-tooltip"></div>
+                                </div>
+                                <div class="text-gray-400 font-bold text-2xl">→</div>
+                                <div class="relative architecture-node">
+                                    <div class="text-4xl">🥤</div>
+                                    <p class="mt-2 font-semibold text-sm">Máquina Freestyle</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 class="text-2xl font-semibold mb-4 text-center">Resultados Clave</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
+                            <div class="bg-white p-4 rounded-lg shadow">
+                                <p class="text-4xl font-bold coke-accent-text stat-number" data-target="65">0</p>
+                                <p class="text-sm text-gray-600 mt-1">Ahorro de Costos (%)</p>
+                            </div>
+                            <div class="bg-white p-4 rounded-lg shadow">
+                                <p class="text-4xl font-bold coke-accent-text stat-number" data-target="100">0</p>
+                                <p class="text-sm text-gray-600 mt-1">Días al Mercado</p>
+                            </div>
+                        </div>
+                        <div class="mt-6">
+                            <h5 class="text-xl font-semibold mb-4 text-center">Cronograma del Proyecto "Mobile Pour"</h5>
+                            <div class="chart-container">
+                                <canvas id="cokeTimelineChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="finra" class="py-20 bg-white fade-in-section">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold finra-accent-text">Caso de Estudio: FINRA</h3>
+                    <p class="mt-4 text-lg text-gray-600">Domando un tsunami de datos con un enfoque metódico y escalable.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <h4 class="text-2xl font-semibold mb-4">La Arquitectura de la Escala</h4>
+                        <p class="text-gray-700 mb-6">
+                           Para validar miles de millones de eventos de mercado, FINRA diseñó una canalización de procesamiento masivamente paralela. Cada archivo de datos que llega desencadena su propio proceso de validación aislado, lo que permite una escala casi infinita. Pasa el cursor sobre los iconos para saber más.
+                        </p>
+                        <div class="bg-gray-50 p-6 rounded-lg shadow-lg border border-gray-200">
+                            <div class="flex items-center justify-around text-center">
+                                <div class="relative architecture-node" data-tooltip="Amazon S3: Un repositorio de almacenamiento altamente duradero. La llegada de un nuevo archivo de datos aquí actúa como el disparador para todo el proceso.">
+                                    <div class="text-4xl">🗃️</div>
+                                    <p class="mt-2 font-semibold text-sm">Amazon S3</p>
+                                    <div class="architecture-tooltip"></div>
+                                </div>
+                                <div class="text-gray-400 font-bold text-2xl">→</div>
+                                <div class="relative architecture-node" data-tooltip="AWS Lambda: Se invoca una función por cada archivo. Miles de funciones se ejecutan en paralelo para validar los datos contra cientos de reglas de negocio.">
+                                    <div class="text-4xl">⚡️</div>
+                                    <p class="mt-2 font-semibold text-sm">AWS Lambda (x N)</p>
+                                    <div class="architecture-tooltip"></div>
+                                </div>
+                                <div class="text-gray-400 font-bold text-2xl">→</div>
+                                <div class="relative architecture-node">
+                                    <div class="text-4xl">📊</div>
+                                    <p class="mt-2 font-semibold text-sm">Resultados Validados</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 class="text-2xl font-semibold mb-4 text-center">Resultados Clave</h4>
+                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
+                            <div class="bg-gray-50 p-4 rounded-lg shadow">
+                                <p class="text-4xl font-bold finra-accent-text stat-number" data-target="85">0</p>
+                                <p class="text-sm text-gray-600 mt-1">Reducción de Tiempo (%)</p>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg shadow">
+                                <p class="text-4xl font-bold finra-accent-text">2x</p>
+                                <p class="text-sm text-gray-600 mt-1">Mejora Eficiencia Costos</p>
+                            </div>
+                        </div>
+                        <div class="mt-6">
+                            <h5 class="text-xl font-semibold mb-4 text-center">Rendimiento de Validación de Datos</h5>
+                            <div class="chart-container">
+                                <canvas id="finraPerfChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="lessons" class="py-20 fade-in-section">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold text-gray-900">Lecciones Estratégicas Clave</h3>
+                    <p class="mt-4 text-lg text-gray-600">Principios extraídos de ambas transformaciones para guiar tu propio viaje a la nube.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <div class="flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100 text-indigo-600 mb-4">
+                            <span class="text-2xl">🎯</span>
+                        </div>
+                        <h4 class="text-lg font-semibold">1. Empieza con un Problema de Alto Impacto</h4>
+                        <p class="mt-2 text-gray-600">Enfócate en un punto de dolor claro y medible (la experiencia del cliente para Coca-Cola, el procesamiento de datos para FINRA) para demostrar valor rápidamente.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <div class="flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100 text-indigo-600 mb-4">
+                            <span class="text-2xl">🧪</span>
+                        </div>
+                        <h4 class="text-lg font-semibold">2. Reduce el Riesgo con Pruebas de Concepto</h4>
+                        <p class="mt-2 text-gray-600">FINRA no asumió que *serverless* era la mejor opción; lo probó contra otras arquitecturas para tomar una decisión basada en datos, no en tendencias.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <div class="flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100 text-indigo-600 mb-4">
+                            <span class="text-2xl">👣</span>
+                        </div>
+                        <h4 class="text-lg font-semibold">3. Adopta una Modernización Pragmática</h4>
+                        <p class="mt-2 text-gray-600">No es necesario que todo sea *serverless* desde el día uno. El enfoque híbrido inicial de FINRA demuestra que la modernización iterativa es una estrategia inteligente.</p>
+                    </div>
+                     <div class="bg-white p-6 rounded-lg shadow-md">
+                        <div class="flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100 text-indigo-600 mb-4">
+                            <span class="text-2xl">🛡️</span>
+                        </div>
+                        <h4 class="text-lg font-semibold">4. Haz de la Seguridad un Socio Fundacional</h4>
+                        <p class="mt-2 text-gray-600">Involucra a seguridad desde el principio. FINRA utilizó la nube para *mejorar* su postura de seguridad, no solo para igualarla.</p>
+                    </div>
+                     <div class="bg-white p-6 rounded-lg shadow-md">
+                        <div class="flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100 text-indigo-600 mb-4">
+                            <span class="text-2xl">🧠</span>
+                        </div>
+                        <h4 class="text-lg font-semibold">5. Adopta la "Mentalidad Sin Servidor"</h4>
+                        <p class="mt-2 text-gray-600">La verdadera transformación va más allá de la tecnología; es un cambio cultural que prioriza la lógica de negocio sobre la gestión de infraestructura.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800">
+        <div class="container mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center">
+            <p class="text-gray-400 text-sm">Aplicación interactiva creada para visualizar casos de estudio de AWS Serverless.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            const createCokeTimelineChart = () => {
+                const ctx = document.getElementById('cokeTimelineChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Lanzamiento Público', '10,000 Máquinas', 'Pilotos (Wendy\'s)', 'Prototipo Funcional', 'Idea Inicial'],
+                        datasets: [{
+                            label: 'Días desde el inicio',
+                            data: [100, 150, 42, 7, 0],
+                            backgroundColor: 'rgba(216, 112, 112, 0.6)',
+                            borderColor: 'rgba(216, 112, 112, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `Día: ${context.raw}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Días'
+                                }
+                            }
+                        }
+                    }
+                });
+            };
+
+            const createFinraPerfChart = () => {
+                const ctx = document.getElementById('finraPerfChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Antes (Local)', 'Después (Serverless)'],
+                        datasets: [{
+                            label: 'Tiempo de Validación (minutos)',
+                            data: [7, 1],
+                            backgroundColor: [
+                                'rgba(106, 142, 174, 0.4)',
+                                'rgba(106, 142, 174, 0.8)'
+                            ],
+                            borderColor: [
+                                'rgba(106, 142, 174, 1)',
+                                'rgba(106, 142, 174, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Minutos'
+                                }
+                            }
+                        }
+                    }
+                });
+            };
+
+            const animateStatNumbers = (entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const el = entry.target;
+                        const target = +el.getAttribute('data-target');
+                        const duration = 1500;
+                        const frameDuration = 1000 / 60;
+                        const totalFrames = Math.round(duration / frameDuration);
+                        let frame = 0;
+
+                        const counter = setInterval(() => {
+                            frame++;
+                            const progress = frame / totalFrames;
+                            const current = Math.round(target * progress);
+                            el.innerText = current;
+
+                            if (frame === totalFrames) {
+                                clearInterval(counter);
+                                el.innerText = target; 
+                            }
+                        }, frameDuration);
+                        
+                        observer.unobserve(el);
+                    }
+                });
+            };
+            
+            const fadeInSections = (entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            };
+
+            const statObserver = new IntersectionObserver(animateStatNumbers, { threshold: 0.5 });
+            document.querySelectorAll('.stat-number').forEach(el => statObserver.observe(el));
+
+            const sectionObserver = new IntersectionObserver(fadeInSections, { threshold: 0.1 });
+            document.querySelectorAll('.fade-in-section').forEach(section => sectionObserver.observe(section));
+
+            const chartObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        if (entry.target.id === 'cokeTimelineChart' && !entry.target.chart) {
+                            createCokeTimelineChart();
+                            entry.target.chart = true;
+                        }
+                        if (entry.target.id === 'finraPerfChart' && !entry.target.chart) {
+                            createFinraPerfChart();
+                            entry.target.chart = true;
+                        }
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.5 });
+            
+            chartObserver.observe(document.getElementById('cokeTimelineChart'));
+            chartObserver.observe(document.getElementById('finraPerfChart'));
+
+            const architectureNodes = document.querySelectorAll('.architecture-node');
+            architectureNodes.forEach(node => {
+                const tooltipText = node.getAttribute('data-tooltip');
+                if (tooltipText) {
+                    const tooltip = node.querySelector('.architecture-tooltip');
+                    tooltip.textContent = tooltipText;
+                    
+                    node.addEventListener('mouseenter', () => {
+                        tooltip.style.display = 'block';
+                    });
+                    node.addEventListener('mouseleave', () => {
+                        tooltip.style.display = 'none';
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
