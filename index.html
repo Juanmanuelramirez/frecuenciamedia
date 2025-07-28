@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Casos de Uso</title>
+</head>
+<body>
+  <h1>Lista de Casos de Uso</h1>
+  <ul id="lista-casos"></ul>
+
+  <script>
+    // Esta versión requiere un archivo JSON con la lista de archivos
+    fetch("casosDuso/lista.json")
+      .then(response => response.json())
+      .then(archivos => {
+        const lista = document.getElementById("lista-casos");
+        archivos.forEach(nombre => {
+          const li = document.createElement("li");
+          const link = document.createElement("a");
+          link.href = `casosDuso/${nombre}`;
+          link.textContent = nombre;
+          li.appendChild(link);
+          lista.appendChild(li);
+        });
+      });
+  </script>
+</body>
+</html>
