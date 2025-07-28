@@ -1,29 +1,132 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Casos de Uso</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Índice de Informes y Documentos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F5F2; /* Un fondo cálido y profesional */
+            color: #333;
+        }
+       .header-accent {
+            color: #003366; /* Un azul oscuro y corporativo */
+        }
+       .link-item {
+            transition: all 0.2s ease-in-out;
+        }
+       .link-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border-left-color: #005A9C; /* Un azul más brillante al pasar el cursor */
+        }
+       .icon-style {
+            color: #005A9C;
+        }
+    </style>
 </head>
-<body>
-  <h1>Lista de Casos de Uso</h1>
-  <ul id="lista-casos"></ul>
+<body class="antialiased">
 
-  <script>
-    // Esta versión requiere un archivo JSON con la lista de archivos
-    fetch("casosDuso/lista.json")
-      .then(response => response.json())
-      .then(archivos => {
-        const lista = document.getElementById("lista-casos");
-        archivos.forEach(nombre => {
-          const li = document.createElement("li");
-          const link = document.createElement("a");
-          link.href = `casosDuso/${nombre}`;
-          link.textContent = nombre;
-          li.appendChild(link);
-          lista.appendChild(li);
+    <div class="container mx-auto px-4 py-12 md:py-20">
+        
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold header-accent tracking-tight">Directorio de Archivos</h1>
+            <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+                Listado automático de todos los informes y documentos HTML en esta carpeta.
+            </p>
+        </header>
+
+        <main class="max-w-3xl mx-auto">
+            <div id="file-list" class="space-y-4">
+                <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-gray-200 text-center">
+                    <p class="text-gray-700 font-semibold">Cargando archivos...</p>
+                </div>
+            </div>
+
+            <div id="error-message" class="hidden mt-8 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg" role="alert">
+                <p class="font-bold">No se pudo listar los archivos automáticamente.</p>
+                <p class="mt-2">Este archivo necesita ser servido a través de un servidor web local para poder detectar otros archivos en la misma carpeta. Por favor, no lo abras directamente con `file:///`.</p>
+                <p class="mt-2 text-sm"><strong>Sugerencia para desarrolladores:</strong> Inicia un servidor simple en esta carpeta con `python -m http.server` o usando la extensión "Live Server" en VS Code.</p>
+            </div>
+        </main>
+
+        <footer class="text-center mt-16 text-gray-500 text-sm">
+            <p>Este índice se genera dinámicamente. © 2024</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const fileListContainer = document.getElementById('file-list');
+            const errorMessageContainer = document.getElementById('error-message');
+
+            // Esta función intenta obtener el listado de archivos del servidor.
+            // Funciona si el servidor tiene habilitado el listado de directorios.
+            async function fetchAndListFiles() {
+                try {
+                    // Intenta hacer fetch al directorio actual.
+                    const response = await fetch('.', {
+                        headers: {
+                            'Accept': 'text/html'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('La respuesta de la red no fue exitosa.');
+                    }
+
+                    const text = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(text, 'text/html');
+                    
+                    const links = Array.from(doc.querySelectorAll('a'));
+                    const htmlFiles = links
+                       .map(link => link.getAttribute('href'))
+                       .filter(href => href && href.endsWith('.html') && href!== 'index.html');
+
+                    fileListContainer.innerHTML = ''; // Limpiar el mensaje de "Cargando..."
+
+                    if (htmlFiles.length > 0) {
+                        htmlFiles.forEach(file => {
+                            const li = document.createElement('a');
+                            li.href = file;
+                            li.className = 'link-item block bg-white p-4 sm:p-6 rounded-lg shadow-sm border-l-4 border-gray-200 flex items-center space-x-4';
+                            
+                            const iconSpan = document.createElement('span');
+                            iconSpan.className = 'text-2xl icon-style';
+                            iconSpan.textContent = '📄';
+
+                            const textSpan = document.createElement('span');
+                            textSpan.className = 'font-semibold text-gray-800';
+                            textSpan.textContent = file.replace('.html', '').replace(/_/g, ' '); // Formatear nombre
+
+                            li.appendChild(iconSpan);
+                            li.appendChild(textSpan);
+                            fileListContainer.appendChild(li);
+                        });
+                    } else {
+                        fileListContainer.innerHTML = `
+                            <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-yellow-400 text-center">
+                                <p class="text-gray-700 font-semibold">No se encontraron otros archivos HTML en esta carpeta.</p>
+                            </div>
+                        `;
+                    }
+
+                } catch (error) {
+                    console.error('Error al listar archivos:', error);
+                    fileListContainer.innerHTML = ''; // Ocultar el contenedor de la lista
+                    errorMessageContainer.classList.remove('hidden');
+                }
+            }
+
+            fetchAndListFiles();
         });
-      });
-  </script>
+    </script>
+
 </body>
 </html>
